@@ -14,7 +14,7 @@ pub use serial::PortSettings;
 pub use serial::StopBits;
 
 /// Newtype over [`serial-rs`](https://crates.io/crates/serial)'s serial port abstraction.
-struct Serial(serial::SystemPort);
+pub struct Serial(serial::SystemPort);
 
 impl Serial {
     pub fn new<PORT: AsRef<OsStr> + ?Sized> (port: &PORT, settings: &serial::PortSettings) -> serial::Result<Self> {
@@ -27,7 +27,7 @@ impl Serial {
 impl embedded_hal::serial::Read<u8> for Serial {
     type Error = serial::Error;
 
-    fn read(&mut self) -> nb::Result<u8, Self::Error> {
+    pub fn read(&mut self) -> nb::Result<u8, Self::Error> {
         let mut buf: [u8; 1] = [0];
         match self.0.read(&mut buf) {
             Ok(_) => Ok(buf[0]),
@@ -46,7 +46,7 @@ impl embedded_hal::serial::Read<u8> for Serial {
 impl embedded_hal::serial::Write<u8> for Serial {
     type Error = serial::Error;
 
-    fn write(&mut self, byte: u8) -> nb::Result<(), Self::Error> {
+    pub fn write(&mut self, byte: u8) -> nb::Result<(), Self::Error> {
         match self.0.write(&[byte]) {
             Ok(_) => Ok(()),
             Err(e) => Err(nb::Error::Other(serial::Error::new(
@@ -56,7 +56,7 @@ impl embedded_hal::serial::Write<u8> for Serial {
         }
     }
 
-    fn flush(&mut self) -> nb::Result<(), Self::Error> {
+    pub fn flush(&mut self) -> nb::Result<(), Self::Error> {
         match self.0.flush() {
             Ok(_) => Ok(()),
             Err(e) => Err(nb::Error::Other(serial::Error::new(
