@@ -17,7 +17,7 @@ pub use serial::StopBits;
 pub struct Serial(serial::SystemPort);
 
 impl Serial {
-    pub fn new<PORT: AsRef<OsStr> + ?Sized> (port: &PORT, settings: &serial::PortSettings) -> serial::Result<Self> {
+    pub fn new<PORT: AsRef<OsStr> + ?Sized>(port: &PORT, settings: &serial::PortSettings) -> serial::Result<Self> {
         let mut port = serial::open(&port)?;
         port.configure(settings)?;
         Ok(Serial(port))
@@ -34,10 +34,7 @@ impl embedded_hal::serial::Read<u8> for Serial {
             Err(e) => match e.kind() {
                 std::io::ErrorKind::WouldBlock => Err(nb::Error::WouldBlock),
                 std::io::ErrorKind::TimedOut => Err(nb::Error::WouldBlock),
-                _ => Err(nb::Error::Other(serial::Error::new(
-                    serial::ErrorKind::Io(e.kind()),
-                    "bad read",
-                ))),
+                _ => Err(nb::Error::Other(serial::Error::new(serial::ErrorKind::Io(e.kind()), "bad read"))),
             },
         }
     }
@@ -49,20 +46,14 @@ impl embedded_hal::serial::Write<u8> for Serial {
     fn write(&mut self, byte: u8) -> nb::Result<(), Self::Error> {
         match self.0.write(&[byte]) {
             Ok(_) => Ok(()),
-            Err(e) => Err(nb::Error::Other(serial::Error::new(
-                serial::ErrorKind::Io(e.kind()),
-                "bad write",
-            ))),
+            Err(e) => Err(nb::Error::Other(serial::Error::new(serial::ErrorKind::Io(e.kind()), "bad write"))),
         }
     }
 
     fn flush(&mut self) -> nb::Result<(), Self::Error> {
         match self.0.flush() {
             Ok(_) => Ok(()),
-            Err(e) => Err(nb::Error::Other(serial::Error::new(
-                serial::ErrorKind::Io(e.kind()),
-                "bad flush",
-            ))),
+            Err(e) => Err(nb::Error::Other(serial::Error::new(serial::ErrorKind::Io(e.kind()), "bad flush"))),
         }
     }
 }
